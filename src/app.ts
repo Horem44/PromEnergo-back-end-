@@ -1,29 +1,57 @@
-import express, {NextFunction, Response, Request, Application} from 'express';
+import express, {Application} from 'express';
 import db from './config/database.config';
 import bodyParser from "body-parser";
-import {ProductInstance} from "./models/Product";
-import {getProducts} from "./controllers/products";
 import productRoutes from './routes/products';
+import * as path from "path";
+import multer, {FileFilterCallback} from 'multer';
+import * as constants from "constants";
 
 const app:Application = express();
 const port:number = 8080;
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname,'../','public', 'images'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const fileFilter = (req:any, file:any, cb:FileFilterCallback) => {
+    if (
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
+app.use(
+    multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
+);
+
 app.use(bodyParser.json());
 
-app.post('/', async (req:Request, res:Response, next:NextFunction) => {
-    console.log(req.body);
-    try{
-        const record = await ProductInstance.create({...req.body})
-        return res.json({record, msg: 'create OK'});
-    }catch (err) {
-        return res.json({status: 500, msg: 'create failed', err});
-    }
+app.use('/static', express.static(path.join(__dirname,'../','public')));
+
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+        "Access-Control-Allow-Methods",
+        "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+    );
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    next();
 });
 
 app.use(productRoutes);
 
-db.sync().then(() => {
+db.sync({force: true}).then(() => {
     console.log('connected');
     app.listen(port);
-}).catch(err => console.log(err))
+}).catch(err => console.log(err));
 

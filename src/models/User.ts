@@ -1,16 +1,18 @@
 import {DataTypes, Model} from "sequelize";
 import db from "../config/database.config";
+import {Order} from "./Order";
 
-interface UserAttributes {
-    id: number,
+export interface UserAttributes {
+    id?: number,
     name: string,
     email: number,
-    password: string
+    password: string,
+    phoneNumber: string
 }
 
-export class UserInstance extends Model<UserAttributes>{}
+export class User extends Model<UserAttributes>{}
 
-UserInstance.init({
+User.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -28,8 +30,20 @@ UserInstance.init({
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     sequelize: db,
     tableName: 'users'
+});
+
+User.hasMany(Order, {
+    onDelete: 'cascade'
+});
+
+Order.belongsTo(User, {
+    onDelete: 'cascade'
 });

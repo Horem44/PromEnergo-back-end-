@@ -5,12 +5,13 @@ export interface ProductAttributes {
     id?: number,
     title: string,
     price: number,
-    imgUrl: string
+    imgUrl: string,
+    category: string
 }
 
-export class ProductInstance extends Model<ProductAttributes>{}
+export class Product extends Model<ProductAttributes>{}
 
-ProductInstance.init({
+Product.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -26,6 +27,10 @@ ProductInstance.init({
         allowNull: false
     },
     imgUrl: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    category: {
         type: DataTypes.STRING,
         allowNull: false
     }

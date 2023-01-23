@@ -1,15 +1,18 @@
 import {DataTypes, Model} from "sequelize";
 import db from "../config/database.config";
+import {Product} from "./Product";
 
 interface OrderAttributes {
     id: number,
     orderDate: Date,
+    quantity: number,
+    totalPrice: number,
     status: boolean,
 }
 
-export class OrderInstance extends Model<OrderAttributes>{}
+export class Order extends Model<OrderAttributes>{}
 
-OrderInstance.init({
+Order.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -20,6 +23,14 @@ OrderInstance.init({
         type: DataTypes.STRING,
         allowNull: false
     },
+    quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    totalPrice: {
+        type: DataTypes.DECIMAL(6,2),
+        allowNull: false
+    },
     status: {
         type: DataTypes.BOOLEAN,
         allowNull: false
@@ -28,3 +39,6 @@ OrderInstance.init({
     sequelize: db,
     tableName: 'orders'
 });
+
+Product.belongsToMany(Order, {through: 'order_products'});
+Order.belongsToMany(Product, {through: 'order_products'});

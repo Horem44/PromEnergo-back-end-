@@ -1,8 +1,8 @@
-import {OrderInstance} from "../models/Order";
+import {Order} from "../models/Order";
 
 export const getOrders = async () => {
     try{
-        const orders = await OrderInstance.findAll();
+        const orders = await Order.findAll();
         return orders;
     }catch (err) {
         console.log(err);
