@@ -1,16 +1,31 @@
 import {Product, ProductAttributes} from "../models/Product";
-import {NextFunction, Request, Response} from "express";
+import {NextFunction, query, Request, Response} from "express";
 import imgPathFormatter from "../util/imgPathFormatter";
+import {Op} from "sequelize";
+
+type filterParams = {
+    category: string
+}[];
 
 export const getProducts = async (req:Request, res:Response, next:NextFunction) => {
     try{
+        const filterParams: filterParams = [];
+        for(let categoryName in req.query) {
+            filterParams.push({category: categoryName});
+        }
+
         const page = +req.params.page;
         const maxItemsAmountOnPage = 8;
         const offset = page * maxItemsAmountOnPage;
 
+        const where = filterParams.length === 0 ? {} : {
+            [Op.or]: filterParams
+        }
+
         const products = await Product.findAndCountAll({
             offset,
-            limit: maxItemsAmountOnPage
+            limit: maxItemsAmountOnPage,
+            where
         });
 
         return res.json(products);

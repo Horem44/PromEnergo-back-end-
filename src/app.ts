@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 
 app.use(productRoutes);
 
-db.sync().then(() => {
+db.sync({force: true}).then(() => {
     console.log('connected');
     app.listen(port);
 }).catch(err => console.log(err));

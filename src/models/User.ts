@@ -7,7 +7,8 @@ export interface UserAttributes {
     name: string,
     email: number,
     password: string,
-    phoneNumber: string
+    phoneNumber: string,
+    organisationName: string
 }
 
 export class User extends Model<UserAttributes>{}
@@ -32,6 +33,10 @@ User.init({
         allowNull: false
     },
     phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    organisationName: {
         type: DataTypes.STRING,
         allowNull: false
     }
