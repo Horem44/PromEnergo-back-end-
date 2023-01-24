@@ -1,5 +1,6 @@
 import express from "express";
 import {getProducts, createProduct, getProduct} from "../controllers/products";
+import isAuth from "../middleware/is-auth";
 
 
 const router = express.Router();
