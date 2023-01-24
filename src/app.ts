@@ -3,6 +3,7 @@ import db from './config/database.config';
 import bodyParser from "body-parser";
 import productRoutes from './routes/products';
 import userRoutes from './routes/users';
+import authRoutes from './routes/auth';
 import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
 import cookieParser from "cookie-parser";
@@ -45,17 +46,18 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.setHeader(
+    res.header(
         "Access-Control-Allow-Methods",
         "OPTIONS, GET, POST, PUT, PATCH, DELETE"
     );
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     next();
 });
 
 
 app.use(productRoutes);
 app.use('/users', userRoutes);
+app.use(authRoutes);
 
 db.sync().then(() => {
     console.log('connected');

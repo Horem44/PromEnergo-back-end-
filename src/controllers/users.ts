@@ -77,7 +77,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
                     {expiresIn: '1h'}
                 );
 
-                res.cookie('token', token, { maxAge: 900000, httpOnly: true});
+                res.cookie('token', token, { maxAge: 900000});
+                res.cookie('userId', loadedUser.dataValues.id, { maxAge: 900000});
                 res.status(200).json({userId: loadedUser.dataValues.id});
             } else {
                 return res.status(401).json({message: 'Невірний пароль або email'});
