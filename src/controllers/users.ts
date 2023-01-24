@@ -2,6 +2,7 @@ import {User, UserAttributes} from "../models/User";
 import {NextFunction, Request, Response} from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import Users from "../routes/users";
 
 export const getUsers = async (
     req: Request,
@@ -15,6 +16,17 @@ export const getUsers = async (
         console.log(err);
     }
 };
+
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.cookies.userId;
+
+    try {
+        const user = await User.findByPk(userId);
+        return res.status(200).json(user);
+    }catch (err) {
+        console.log(err);
+    }
+}
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
