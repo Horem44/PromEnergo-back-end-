@@ -5,6 +5,7 @@ import {Order} from "./Order";
 export interface UserAttributes {
     id?: number,
     name: string,
+    surname: string,
     email: number,
     password: string,
     phoneNumber: string,
@@ -21,6 +22,10 @@ User.init({
         autoIncrement: true
     },
     name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    surname: {
         type: DataTypes.STRING,
         allowNull: false
     },

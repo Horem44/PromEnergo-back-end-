@@ -2,9 +2,11 @@ import express, {Application} from 'express';
 import db from './config/database.config';
 import bodyParser from "body-parser";
 import productRoutes from './routes/products';
+import userRoutes from './routes/users';
 import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
-import * as constants from "constants";
+import cookieParser from "cookie-parser";
+
 
 const app:Application = express();
 const port:number = 8080;
@@ -35,11 +37,14 @@ app.use(
 );
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use('/static', express.static(path.join(__dirname,'../','public')));
 
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.setHeader(
         "Access-Control-Allow-Methods",
         "OPTIONS, GET, POST, PUT, PATCH, DELETE"
@@ -48,9 +53,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(productRoutes);
 
-db.sync({force: true}).then(() => {
+app.use(productRoutes);
+app.use('/users', userRoutes);
+
+db.sync().then(() => {
     console.log('connected');
     app.listen(port);
 }).catch(err => console.log(err));

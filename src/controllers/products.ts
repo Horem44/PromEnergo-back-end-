@@ -9,6 +9,7 @@ type filterParams = {
 
 export const getProducts = async (req:Request, res:Response, next:NextFunction) => {
     try{
+        console.log(req.cookies);
         const filterParams: filterParams = [];
         for(let categoryName in req.query) {
             filterParams.push({category: categoryName});
