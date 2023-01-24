@@ -1,5 +1,5 @@
 import express from "express";
-import {createUser, getUser, getUsers, loginUser} from "../controllers/users";
+import {createUser, getUser, getUsers, loginUser, updateUser} from "../controllers/users";
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.post('/registration', createUser);
 
 //POST Login User
 router.post('/login', loginUser);
+
+//POST Update User
+router.post('/update', updateUser);
 
 
 export default router;

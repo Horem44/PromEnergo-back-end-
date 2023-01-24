@@ -104,3 +104,25 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         console.log(err);
     }
 };
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.cookies.userId;
+
+    const user = {
+        name: req.body.name,
+        surname: req.body.surname,
+        email: req.body.email,
+        password: req.body.password,
+        phoneNumber: req.body.phoneNumber,
+        organisationName: req.body.organisationName || 'None'
+    };
+
+    try {
+        const existingUser = await User.findByPk(userId);
+        const updatedUser = await existingUser?.update(user);
+
+        res.status(200).json(updatedUser);
+    }catch (err){
+        console.log(err);
+    }
+}
