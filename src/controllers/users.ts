@@ -60,7 +60,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
             warehouse: ''
         };
 
-        const record = User.create(newUser);
+        await User.create(newUser);
         return res.status(200).json({message: 'User created successfully'});
     } catch (err) {
         return res.status(401).json({message: 'User creation failed'});
@@ -93,7 +93,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
                     {expiresIn: '1h'}
                 );
 
-                res.cookie('token', token, {maxAge: 900000});
+                res.cookie('token', token, {secure: false, httpOnly: true, maxAge: 900000});
                 res.cookie('userId', loadedUser.dataValues.id, {maxAge: 900000});
                 res.status(200).json({userId: loadedUser.dataValues.id});
             } else {
@@ -105,6 +105,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     } catch (err) {
         console.log(err);
     }
+};
+
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie('token');
+    res.clearCookie('userId');
+    return res.status(200).end();
 };
 
 export const updateUserInfo = async (req: Request, res: Response, next: NextFunction) => {
@@ -123,7 +129,7 @@ export const updateUserInfo = async (req: Request, res: Response, next: NextFunc
         const existingUser = await User.findByPk(userId);
         const updatedUser = await existingUser?.update(user);
 
-        res.status(200).json(updatedUser);
+        return res.status(200).json(updatedUser);
     } catch (err) {
         console.log(err);
     }
@@ -141,7 +147,7 @@ export const updateUserDelivery = async (req: Request, res: Response, next: Next
         const existingUser = await User.findByPk(userId);
         const updatedUser = await existingUser?.update(userDelivery);
 
-        res.status(200).json(updatedUser);
+        return res.status(200).json(updatedUser);
     } catch (err) {
         console.log(err);
     }
@@ -178,7 +184,7 @@ export const sendResetPasswordEmail = async (req: Request, res: Response, next: 
             }
         }
 
-        const letterText = `http://localhost:8080/reset/${token.dataValues.token}`;
+        const letterText = `http://localhost:3000/new-password/${token.dataValues.token}`;
 
         await sendEmail(email, 'Зміна пароля', letterText);
 
@@ -222,7 +228,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         }
 
         await user.update({password: newHashedPassword});
-
+        await tokenExists.destroy();
         return res.status(200).json(user);
     }catch(err){
         console.log(err);

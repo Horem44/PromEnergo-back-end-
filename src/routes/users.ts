@@ -4,7 +4,7 @@ import {
     createUser,
     getUser,
     getUsers,
-    loginUser,
+    loginUser, logoutUser,
     sendResetPasswordEmail,
     updateUserDelivery,
     updateUserInfo
@@ -23,6 +23,9 @@ router.post('/registration', createUser);
 
 //POST Login User
 router.post('/login', loginUser);
+
+//Get Logout User
+router.get('/logout', logoutUser);
 
 //POST Update UserInfo
 router.post('/update', updateUserInfo);

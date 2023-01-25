@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
 import cookieParser from "cookie-parser";
+import cors from 'cors';
 
 
 const app:Application = express();
@@ -33,6 +34,14 @@ const fileFilter = (req:any, file:any, cb:FileFilterCallback) => {
     }
 };
 
+const corsOptions ={
+    origin: 'http://localhost:3000',
+    credentials: true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions));
+
 app.use(
     multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 );
@@ -42,17 +51,17 @@ app.use(cookieParser());
 
 app.use('/static', express.static(path.join(__dirname,'../','public')));
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header(
-        "Access-Control-Allow-Methods",
-        "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-    );
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-});
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', 'https://localhost:3000');
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     res.header('Access-Control-Allow-Credentials', 'true');
+//     res.header(
+//         "Access-Control-Allow-Methods",
+//         "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+//     );
+//     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//     next();
+// });
 
 
 app.use(productRoutes);
