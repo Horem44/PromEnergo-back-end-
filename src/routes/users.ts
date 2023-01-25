@@ -1,5 +1,14 @@
 import express from "express";
-import {createUser, getUser, getUsers, loginUser, updateUser} from "../controllers/users";
+import {
+    changePassword,
+    createUser,
+    getUser,
+    getUsers,
+    loginUser,
+    sendResetPasswordEmail,
+    updateUserDelivery,
+    updateUserInfo
+} from "../controllers/users";
 
 const router = express.Router();
 
@@ -15,8 +24,18 @@ router.post('/registration', createUser);
 //POST Login User
 router.post('/login', loginUser);
 
-//POST Update User
-router.post('/update', updateUser);
+//POST Update UserInfo
+router.post('/update', updateUserInfo);
+
+//POST Update UserInfo
+router.post('/update/delivery', updateUserDelivery);
+
+//POST Password reset
+router.post('/reset', sendResetPasswordEmail);
+
+//POST Change Password
+router.post('/reset/:token', changePassword);
+
 
 
 export default router;

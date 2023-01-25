@@ -1,6 +1,7 @@
 import {DataTypes, Model} from "sequelize";
 import db from "../config/database.config";
 import {Order} from "./Order";
+import {Token} from "./Token";
 
 export interface UserAttributes {
     id?: number,
@@ -9,7 +10,9 @@ export interface UserAttributes {
     email: number,
     password: string,
     phoneNumber: string,
-    organisationName: string
+    organisationName: string,
+    deliveryCity: string,
+    warehouse: string
 }
 
 export class User extends Model<UserAttributes>{}
@@ -27,7 +30,7 @@ User.init({
     },
     surname: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     email: {
         type: DataTypes.STRING,
@@ -44,7 +47,15 @@ User.init({
     organisationName: {
         type: DataTypes.STRING,
         allowNull: false
-    }
+    },
+    deliveryCity: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    warehouse: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
 }, {
     sequelize: db,
     tableName: 'users'
@@ -55,5 +66,13 @@ User.hasMany(Order, {
 });
 
 Order.belongsTo(User, {
+    onDelete: 'cascade'
+});
+
+User.hasOne(Token,  {
+    onDelete: 'cascade'
+});
+
+Token.belongsTo(User, {
     onDelete: 'cascade'
 });
