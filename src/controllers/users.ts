@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../util/sendEmail";
 import * as crypto from "crypto";
 import {Token} from "../models/Token";
+import {Error} from "../models/Error";
 import {validationResult} from "express-validator";
 
 export const getUsers = async (
@@ -16,7 +17,7 @@ export const getUsers = async (
         const users = await User.findAll();
         return res.status(200).json(users);
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
@@ -30,18 +31,18 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
         const user = await User.findByPk(userId);
         return res.status(200).json(user);
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 }
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-
     try {
+        if (!errors.isEmpty()) {
+            throw new Error('Validation error', 422, errors.array());
+        }
+
         const saltRounds = 10;
 
         let name = req.body.name;
@@ -54,7 +55,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
         const userExists = await User.findOne({where: {email: email}});
 
         if (userExists) {
-            return res.status(401).json({message: 'Такий email вже існує.'});
+            throw new Error('Такий email вже існує.', 400);
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -73,18 +74,18 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
         await User.create(newUser);
         return res.status(200).json({message: 'User created successfully'});
     } catch (err) {
-        return res.status(401).json({message: 'User creation failed'});
+        next(err);
     }
 };
 
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-
     try {
+        if (!errors.isEmpty()) {
+            throw new Error('Validation error', 422, errors.array());
+        }
+
         const userCredentials = {
             email: req.body.email,
             password: req.body.password,
@@ -113,13 +114,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
                 res.cookie('userId', loadedUser.dataValues.id, {maxAge: 900000});
                 res.status(200).json({userId: loadedUser.dataValues.id});
             } else {
-                return res.status(401).json({message: 'Невірний пароль або email'});
+                throw new Error('Невірний пароль або email', 422);
             }
         } else {
-            return res.status(401).json({message: 'Користувача з таким email не існує'});
+            throw new Error('Користувача з таким email не існує');
         }
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
@@ -134,10 +135,6 @@ export const updateUserInfo = async (req: Request, res: Response, next: NextFunc
 
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-
     const user = {
         name: req.body.name,
         surname: req.body.surname,
@@ -148,12 +145,16 @@ export const updateUserInfo = async (req: Request, res: Response, next: NextFunc
     };
 
     try {
+        if (!errors.isEmpty()) {
+            throw new Error('Validation error', 422, errors.array());
+        }
+
         const existingUser = await User.findByPk(userId);
         const updatedUser = await existingUser?.update(user);
 
         return res.status(200).json(updatedUser);
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 }
 
@@ -171,7 +172,7 @@ export const updateUserDelivery = async (req: Request, res: Response, next: Next
 
         return res.status(200).json(updatedUser);
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
@@ -181,15 +182,15 @@ export const sendResetPasswordEmail = async (req: Request, res: Response, next: 
     const email = req.body.email;
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-
     try {
+        if (!errors.isEmpty()) {
+            throw new Error('Validation error', 422, errors.array());
+        }
+
         const user = await User.findOne({where: {id: userId, email: email}});
 
         if (!user) {
-            return res.status(400).json({message: "user with given email doesn't exist"});
+            throw new Error("Користувача з таким email не існує", 400);
         }
 
         let token = await Token.findOne({where: {UserId: userId}});
@@ -217,7 +218,7 @@ export const sendResetPasswordEmail = async (req: Request, res: Response, next: 
 
         return res.status(200).json({token});
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
@@ -230,11 +231,11 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-
     try {
+        if (!errors.isEmpty()) {
+            throw new Error('Validation error', 422, errors.array());
+        }
+
         tokenExists = await Token.findOne({
             where: {
                 token: token,
@@ -245,11 +246,11 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         const currentDate = new Date(new Date().getTime() + 2 * 3600000).getTime();
 
         if(!tokenExists){
-            return res.status(401).json('No such user');
+            throw new Error("Користувача не існує");
         }
 
         if (new Date(tokenExists!.dataValues.expirationTime).getTime() < currentDate) {
-            return res.status(401).json('Token expired');
+            throw new Error("Срок дії сесії вичерпано");
         }
 
         const newHashedPassword = await bcrypt.hash(password, saltRounds);
@@ -257,13 +258,13 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         const user = await User.findByPk(userId);
 
         if(!user){
-            return res.status(401).json('No such user');
+            throw new Error("Користувача не існує");
         }
 
         await user.update({password: newHashedPassword});
         await tokenExists.destroy();
         return res.status(200).json(user);
     }catch(err){
-        console.log(err);
+        next(err);
     }
 };

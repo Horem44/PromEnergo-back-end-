@@ -9,7 +9,6 @@ type filterParams = {
 
 export const getProducts = async (req:Request, res:Response, next:NextFunction) => {
     try{
-        console.log(req.cookies);
         const filterParams: filterParams = [];
         for(let categoryName in req.query) {
             filterParams.push({category: categoryName});
@@ -29,18 +28,18 @@ export const getProducts = async (req:Request, res:Response, next:NextFunction) 
             where
         });
 
-        return res.json(products);
+        return res.status(200).json(products);
     }catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
 export const getProduct = async (req:Request, res:Response, next:NextFunction) => {
     try{
         const product = await Product.findByPk(+req.params.prodId);
-        return res.json(product);
+        return res.status(200).json(product);
     }catch (err) {
-        console.log(err);
+        next(err);
     }
 };
 
@@ -54,8 +53,8 @@ export const createProduct = async (req:Request, res:Response, next:NextFunction
         };
 
         const record = await Product.create(product);
-        return res.json(record);
+        return res.status(200).json(record);
     }catch (err) {
-        console.log(err);
+        next(err);
     }
 }

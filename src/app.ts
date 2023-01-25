@@ -1,4 +1,4 @@
-import express, {Application, NextFunction} from 'express';
+import express, {Application, NextFunction, Request, Response} from 'express';
 import db from './config/database.config';
 import bodyParser from "body-parser";
 import productRoutes from './routes/products';
@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import cors from 'cors';
 import router from "./routes/users";
 import isAuth from "./middleware/is-auth";
+import errorHandler from "./middleware/errorHandler";
 
 const app:Application = express();
 const port:number = 8080;
@@ -63,12 +64,13 @@ app.use('/static', express.static(path.join(__dirname,'../','public')));
 //     next();
 // });
 
-
 app.use(productRoutes);
 app.use('/users', userRoutes);
-app.get('/', isAuth, (req, res, next) => {
+app.get('/', isAuth, (req:Request, res:Response) => {
     return res.status(200).json({isNotAuth: req.body.isNotAuth})
 });
+
+app.use(errorHandler);
 
 db.sync().then(() => {
     console.log('connected');
