@@ -1,14 +1,14 @@
-import express, {Application} from 'express';
+import express, {Application, NextFunction} from 'express';
 import db from './config/database.config';
 import bodyParser from "body-parser";
 import productRoutes from './routes/products';
 import userRoutes from './routes/users';
-import authRoutes from './routes/auth';
 import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
-
+import router from "./routes/users";
+import isAuth from "./middleware/is-auth";
 
 const app:Application = express();
 const port:number = 8080;
@@ -66,7 +66,9 @@ app.use('/static', express.static(path.join(__dirname,'../','public')));
 
 app.use(productRoutes);
 app.use('/users', userRoutes);
-app.use(authRoutes);
+app.get('/', isAuth, (req, res, next) => {
+    return res.status(200).json({isNotAuth: req.body.isNotAuth})
+});
 
 db.sync().then(() => {
     console.log('connected');

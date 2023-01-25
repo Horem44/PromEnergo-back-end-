@@ -4,27 +4,20 @@ import {Response, Request, NextFunction} from "express";
 
 const isAuth = (req:Request, res:Response, next:NextFunction) => {
     const token = req.cookies.token;
-    const userId = req.cookies.userId;
-    const decodedToken:any = jwt.decode(token)!;
-    const ifSameId = decodedToken!.userId === +userId;
+    console.log(token);
     let ifVerifiedToken;
 
     try{
         ifVerifiedToken = jwt.verify(token, 'somesupersecretsecret');
 
         if(!ifVerifiedToken || !token) {
-            return res.status(401).json({isAuth: false});
+            req.body.error = true;
         }
-
-        if(!ifSameId){
-            return res.status(401).json({isAuth: false});
-        }
-
-        return res.status(200).json({isAuth: true});
     } catch (err){
-        return res.status(401).json({isAuth: false});
+        req.body.error = true;
     }
 
+    next();
 };
 
 export default isAuth;

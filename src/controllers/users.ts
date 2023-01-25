@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../util/sendEmail";
 import * as crypto from "crypto";
 import {Token} from "../models/Token";
+import {validationResult} from "express-validator";
 
 export const getUsers = async (
     req: Request,
@@ -21,6 +22,9 @@ export const getUsers = async (
 
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.cookies.userId;
+    if(req.body.error){
+        return res.status(401).json({isNotAuth: true});
+    }
 
     try {
         const user = await User.findByPk(userId);
@@ -31,6 +35,12 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 }
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json(errors.array());
+    }
+
     try {
         const saltRounds = 10;
 
@@ -68,6 +78,12 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 };
 
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json(errors.array());
+    }
+
     try {
         const userCredentials = {
             email: req.body.email,
@@ -116,6 +132,12 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
 export const updateUserInfo = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.cookies.userId;
 
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json(errors.array());
+    }
+
     const user = {
         name: req.body.name,
         surname: req.body.surname,
@@ -157,6 +179,11 @@ export const updateUserDelivery = async (req: Request, res: Response, next: Next
 export const sendResetPasswordEmail = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.cookies.userId;
     const email = req.body.email;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json(errors.array());
+    }
 
     try {
         const user = await User.findOne({where: {id: userId, email: email}});
@@ -200,6 +227,12 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     const userId = req.cookies.userId;
     const saltRounds = 10;
     let tokenExists;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json(errors.array());
+    }
 
     try {
         tokenExists = await Token.findOne({
