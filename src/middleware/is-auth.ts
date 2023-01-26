@@ -11,16 +11,17 @@ const isAuth = (req:Request, res:Response, next:NextFunction) => {
         ifVerifiedToken = jwt.verify(token, 'somesupersecretsecret');
 
         if(ifVerifiedToken.userId !== +userId){
-            req.body.error = true;
+            req.body.isNotAuth = true;
         }
 
         if(!ifVerifiedToken || !token) {
-            req.body.error = true;
+            req.body.isNotAuth = true;
         }
 
         next();
     } catch (err){
-        req.body.error = true;
+        req.body.isNotAuth = true;
+        next();
     }
 };
 

@@ -23,7 +23,7 @@ export const getUsers = async (
 
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.cookies.userId;
-    if(req.body.error){
+    if(req.body.isNotAuth){
         return res.status(401).json({isNotAuth: true});
     }
 
@@ -80,6 +80,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
+    const isAdmin = req.body.isAdmin;
 
     try {
         if (!errors.isEmpty()) {
@@ -112,7 +113,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
                 res.cookie('token', token, {secure: false, httpOnly: true, maxAge: 900000});
                 res.cookie('userId', loadedUser.dataValues.id, {maxAge: 900000});
-                res.status(200).json({userId: loadedUser.dataValues.id});
+                return res.status(200).json({userId: loadedUser.dataValues.id, isAdmin});
             } else {
                 throw new Error('Невірний пароль або email', 422);
             }
@@ -183,6 +184,10 @@ export const sendResetPasswordEmail = async (req: Request, res: Response, next: 
     const errors = validationResult(req);
 
     try {
+        if(req.body.isNotAuth){
+            return res.status(401).json({isNotAuth: true});
+        }
+
         if (!errors.isEmpty()) {
             throw new Error('Validation error', 422, errors.array());
         }
@@ -234,6 +239,10 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     try {
         if (!errors.isEmpty()) {
             throw new Error('Validation error', 422, errors.array());
+        }
+
+        if(req.body.isNotAuth){
+            return res.status(401).json({isNotAuth: true});
         }
 
         tokenExists = await Token.findOne({

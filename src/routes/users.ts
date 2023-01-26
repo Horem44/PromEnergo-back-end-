@@ -16,6 +16,7 @@ import registrationValidators from "../validators/registrationValidators";
 import loginValidators from "../validators/loginValidators";
 import userInfoValidators from "../validators/userInfoValidators";
 import isAuth from "../middleware/is-auth";
+import isAdmin from "../middleware/is-admin";
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/single', isAuth, getUser);
 router.post('/registration', registrationValidators, createUser);
 
 //POST Login User
-router.post('/login', loginValidators, loginUser);
+router.post('/login', loginValidators, isAdmin, loginUser);
 
 //Get Logout User
 router.get('/logout', logoutUser);
@@ -46,7 +47,7 @@ router.post('/reset', isAuth, [body('email').isEmail()], sendResetPasswordEmail)
 //POST Change Password
 router.post('/reset/:token', isAuth, [
     body('password').notEmpty().isLength({min: 6}),
-    body('confirmPassword').notEmpty().isLength({min: 6}).equals('password')
+    body('confirmPassword').notEmpty().isLength({min: 6})
 ], changePassword);
 
 

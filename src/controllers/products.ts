@@ -28,7 +28,7 @@ export const getProducts = async (req:Request, res:Response, next:NextFunction) 
             where
         });
 
-        return res.status(200).json(products);
+        return res.status(200).json({products: products});
     }catch (err) {
         next(err);
     }
@@ -45,6 +45,10 @@ export const getProduct = async (req:Request, res:Response, next:NextFunction) =
 
 export const createProduct = async (req:Request, res:Response, next:NextFunction) => {
     try {
+        if(!req.body.isAdmin){
+            return res.status(401).end();
+        }
+
         const product:ProductAttributes = {
             title: req.body.title,
             price: req.body.price,
@@ -54,6 +58,45 @@ export const createProduct = async (req:Request, res:Response, next:NextFunction
 
         const record = await Product.create(product);
         return res.status(200).json(record);
+    }catch (err) {
+        next(err);
+    }
+}
+
+export const updateProduct = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        if(!req.body.isAdmin){
+            return res.status(401).end();
+        }
+
+        const prodId = req.params.prodId;
+
+        const newProduct:ProductAttributes = {
+            title: req.body.title,
+            price: req.body.price,
+            imgUrl: imgPathFormatter(req.file?.path!),
+            category: req.body.category
+        };
+
+        const product = await Product.findByPk(+prodId);
+        await product?.update(newProduct)
+        return res.status(200).json(product);
+    }catch (err) {
+        next(err);
+    }
+}
+
+export const deleteProduct = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        if(!req.body.isAdmin){
+            return res.status(401).end();
+        }
+
+        const prodId = req.params.prodId;
+
+        const product = await Product.findByPk(+prodId);
+        await product?.destroy()
+        return res.status(200).end();
     }catch (err) {
         next(err);
     }

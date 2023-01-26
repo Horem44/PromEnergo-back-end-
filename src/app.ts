@@ -7,9 +7,9 @@ import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
-import router from "./routes/users";
 import isAuth from "./middleware/is-auth";
 import errorHandler from "./middleware/errorHandler";
+import isAdmin from "./middleware/is-admin";
 
 const app:Application = express();
 const port:number = 8080;
@@ -66,8 +66,8 @@ app.use('/static', express.static(path.join(__dirname,'../','public')));
 
 app.use(productRoutes);
 app.use('/users', userRoutes);
-app.get('/', isAuth, (req:Request, res:Response) => {
-    return res.status(200).json({isNotAuth: req.body.isNotAuth})
+app.get('/', isAdmin, isAuth, (req:Request, res:Response) => {
+    return res.status(200).json({isNotAuth: req.body.isNotAuth, isAdmin: req.body.isAdmin})
 });
 
 app.use(errorHandler);
