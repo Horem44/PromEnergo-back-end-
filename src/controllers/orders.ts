@@ -12,9 +12,9 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.cookies.userId;
+    const userId = +req.cookies.userId;
     const prodId = req.body.prodId;
-    const price = req.body.price;
+    const price = parseFloat(req.body.price);
 
     try {
         let existingOrder: any = await OrderProduct.findOne({
