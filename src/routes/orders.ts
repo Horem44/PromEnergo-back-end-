@@ -1,9 +1,9 @@
 import express from "express";
-import {createOrder, getOrders} from "../controllers/orders";
+import {createOrder, getUserOrders} from "../controllers/orders";
 
 const router = express.Router();
 
-router.get('/orders', getOrders);
+router.get('/orders/user', getUserOrders);
 
 router.post('/order', createOrder);
 

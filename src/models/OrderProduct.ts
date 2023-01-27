@@ -36,10 +36,10 @@ OrderProduct.init({
     timestamps: false
 });
 
-Product.hasMany(OrderProduct);
-OrderProduct.belongsTo(Product);
+Product.hasMany(OrderProduct, {onDelete: 'cascade', onUpdate: 'cascade'});
+OrderProduct.belongsTo(Product, {onDelete: 'cascade', onUpdate: 'cascade'});
 
-Order.hasMany(OrderProduct);
-OrderProduct.belongsTo(Order);
+Order.hasMany(OrderProduct, {onDelete: 'cascade', onUpdate: 'cascade'});
+OrderProduct.belongsTo(Order, {onDelete: 'cascade', onUpdate: 'cascade'});
 
 export default OrderProduct;

@@ -1,13 +1,57 @@
 import {Order} from "../models/Order";
 import {NextFunction, Request, Response} from "express";
 import OrderProduct from "../models/OrderProduct";
+import {Product} from "../models/Product";
+import {Op} from "sequelize";
+import {Error} from "../models/Error";
 
-export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserOrders = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = +req.cookies.userId;
+
     try {
-        const orders = await Order.findAll();
-        return res.status(200).json(orders);
+        const userOrders:any = await OrderProduct.findAll({
+            include: [
+                {
+                    model: Order,
+                    where: {
+                        UserId: userId
+                    }
+                }]
+        });
+
+        if(userOrders.length === 0){
+            throw new Error('User has no orders');
+        }
+
+        let userOrderIds = [];
+        let orders = [];
+
+        for(let order of userOrders){
+            orders.push(order.dataValues.Order.dataValues);
+            userOrderIds.push(order.dataValues.Order.dataValues.id);
+        }
+
+        const userOrderProducts:any = await OrderProduct.findAll({
+            where: {
+                OrderId: {
+                    [Op.or]: userOrderIds
+                }
+            },
+            include: {
+                model: Product
+            }
+        });
+
+        let products = [];
+
+        for(let product of userOrderProducts){
+            products.push(product.dataValues.Product.dataValues);
+        }
+
+        return res.status(200).json({orders, products});
     } catch (err) {
         console.log(err);
+        next(err);
     }
 };
 
