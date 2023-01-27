@@ -4,6 +4,7 @@ import OrderProduct from "../models/OrderProduct";
 import {Product} from "../models/Product";
 import {Op} from "sequelize";
 import {Error} from "../models/Error";
+import {ValidatorsImpl} from "express-validator/src/chain";
 
 export const getUserOrders = async (req: Request, res: Response, next: NextFunction) => {
     const userId = +req.cookies.userId;
@@ -15,6 +16,9 @@ export const getUserOrders = async (req: Request, res: Response, next: NextFunct
                     model: Order,
                     where: {
                         UserId: userId
+                    },
+                    attributes: {
+                        exclude: ["createdAt", "updatedAt", "UserId"]
                     }
                 }]
         });
@@ -42,13 +46,16 @@ export const getUserOrders = async (req: Request, res: Response, next: NextFunct
             }
         });
 
-        let products = [];
+        let counter = 0;
 
         for(let product of userOrderProducts){
-            products.push(product.dataValues.Product.dataValues);
+            orders[counter].prodId = (product.dataValues.Product.dataValues.id);
+            orders[counter].prodImgUrl = (product.dataValues.Product.dataValues.imgUrl);
+            orders[counter].orderNo = counter + 1;
+            counter++;
         }
 
-        return res.status(200).json({orders, products});
+        return res.status(200).json({orders});
     } catch (err) {
         console.log(err);
         next(err);
@@ -105,4 +112,31 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
         console.log(err);
         next(err);
     }
-}
+};
+
+export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = +req.cookies.userId;
+    const prodId = +req.params.prodId;
+    console.log(prodId);
+
+    try{
+        const orderToDelete = await OrderProduct.findOne({
+            where: {
+                ProductId: prodId
+            },
+            include: {
+                model: Order,
+                where: {
+                    UserId: userId
+                }
+            }
+        });
+
+        console.log(orderToDelete);
+        await orderToDelete?.destroy();
+        return res.status(200).end();
+    }catch (err){
+        console.log(err);
+        next(err)
+    }
+};
