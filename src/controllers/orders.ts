@@ -67,6 +67,8 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     const prodId = req.body.prodId;
     const price = parseFloat(req.body.price);
 
+    console.log(prodId, price, userId);
+
     try {
         let existingOrder: any = await OrderProduct.findOne({
             where: {
