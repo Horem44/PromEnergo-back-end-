@@ -34,6 +34,7 @@ const isAdmin = (req: Request, res: Response, next: NextFunction) => {
 
             next();
         } catch (err){
+            console.log(err);
             req.body.isAdmin = false;
             next();
         }

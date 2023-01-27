@@ -1,12 +1,12 @@
 import {DataTypes, Model} from "sequelize";
 import db from "../config/database.config";
-import {Product} from "./Product";
 
 interface OrderAttributes {
-    id: number,
-    orderDate: Date,
+    id?: number,
+    orderDate: string,
     quantity: number,
     totalPrice: number,
+    UserId: number,
     status: boolean,
 }
 
@@ -28,8 +28,12 @@ Order.init({
         allowNull: false,
     },
     totalPrice: {
-        type: DataTypes.DECIMAL(6,2),
+        type: DataTypes.DECIMAL(10,2),
         allowNull: false
+    },
+    UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
     status: {
         type: DataTypes.BOOLEAN,
@@ -39,6 +43,3 @@ Order.init({
     sequelize: db,
     tableName: 'orders'
 });
-
-Product.belongsToMany(Order, {through: 'order_products'});
-Order.belongsToMany(Product, {through: 'order_products'});

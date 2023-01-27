@@ -3,6 +3,7 @@ import db from './config/database.config';
 import bodyParser from "body-parser";
 import productRoutes from './routes/products';
 import userRoutes from './routes/users';
+import orderRoutes from './routes/orders';
 import * as path from "path";
 import multer, {FileFilterCallback} from 'multer';
 import cookieParser from "cookie-parser";
@@ -66,6 +67,7 @@ app.use('/static', express.static(path.join(__dirname,'../','public')));
 
 app.use(productRoutes);
 app.use('/users', userRoutes);
+app.use(orderRoutes);
 app.get('/', isAdmin, isAuth, (req:Request, res:Response) => {
     return res.status(200).json({isNotAuth: req.body.isNotAuth, isAdmin: req.body.isAdmin})
 });
