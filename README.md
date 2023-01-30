@@ -2,6 +2,10 @@
 
 Online store with the ability to manage orders by administrator
 
+## npm run dev
+
+Start server
+
 ## Technologies used in the development
 
 TypeScript, NodeJS, Express, Sequelize (ORM for working with MySQL database), MySQL
